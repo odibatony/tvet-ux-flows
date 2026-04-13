@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVET Blockchain Module — UX Flows</title>
+<style>
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f7f7f5;
+    --bg-tertiary: #f0f0ec;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-tertiary: #9b9b9b;
+    --border: rgba(0,0,0,0.1);
+    --border-hover: rgba(0,0,0,0.2);
+    --green-bg: #ecfdf5;
+    --green-text: #065f46;
+    --green-solid: #0F6E56;
+    --amber-bg: #fffbeb;
+    --amber-text: #92400e;
+    --blue-bg: #eff6ff;
+    --blue-text: #1e40af;
+    --red-bg: #fef2f2;
+    --red-text: #991b1b;
+    --behind-bg: #04342C;
+    --behind-label: #5DCAA5;
+    --behind-text: #9FE1CB;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #242424;
+      --bg-tertiary: #2e2e2e;
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0a0a0;
+      --text-tertiary: #707070;
+      --border: rgba(255,255,255,0.1);
+      --border-hover: rgba(255,255,255,0.2);
+      --green-bg: #052e16;
+      --green-text: #86efac;
+      --amber-bg: #451a03;
+      --amber-text: #fbbf24;
+      --blue-bg: #172554;
+      --blue-text: #93c5fd;
+      --red-bg: #450a0a;
+      --red-text: #fca5a5;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); background: var(--bg-tertiary); color: var(--text-primary); padding: 24px; line-height: 1.5; }
+
+  .container { max-width: 760px; margin: 0 auto; }
+
+  .header { margin-bottom: 24px; }
+  .header h1 { font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  .header p { font-size: 13px; color: var(--text-secondary); }
+
+  .roles { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+  .role-btn {
+    padding: 9px 18px; border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--bg-primary); color: var(--text-secondary); font-size: 13px;
+    cursor: pointer; font-weight: 400; font-family: var(--font-sans); transition: all 0.15s;
+  }
+  .role-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+  .role-btn.active { background: var(--green-solid); color: #fff; border-color: var(--green-solid); font-weight: 500; }
+
+  .flow { display: none; }
+  .flow.active { display: block; }
+
+  .step { display: flex; gap: 14px; margin-bottom: 12px; }
+  .step-num {
+    min-width: 30px; height: 30px; border-radius: 50%; background: var(--green-solid);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0; margin-top: 1px;
+  }
+  .step-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .step-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  .screen-mock {
+    background: var(--bg-secondary); border-radius: var(--radius-lg);
+    padding: 18px 22px; margin: 14px 0; border: 1px solid var(--border);
+  }
+  .screen-label {
+    font-size: 11px; color: var(--text-tertiary); text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 12px; font-weight: 500;
+  }
+
+  .behind {
+    background: var(--behind-bg); border-radius: var(--radius-lg);
+    padding: 18px 22px; margin: 8px 0 18px; border: none;
+  }
+  .behind .screen-label { color: var(--behind-label); }
+  .behind p { color: var(--behind-text); font-size: 12px; line-height: 1.7; font-family: var(--font-mono); }
+
+  .field-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 0; border-bottom: 1px solid var(--border);
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-label { font-size: 12px; color: var(--text-secondary); min-width: 120px; }
+  .field-val { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: var(--radius);
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-green { background: var(--green-bg); color: var(--green-text); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue-text); }
+
+  .mock-btn {
+    display: inline-block; padding: 8px 20px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500; border: none; cursor: default;
+  }
+  .mock-btn-green { background: var(--green-solid); color: #fff; }
+  .mock-btn-red { background: #991b1b; color: #fff; }
+  .mock-btn-outline { background: transparent; border: 1px solid var(--border-hover); color: var(--text-secondary); }
+
+  .mock-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: var(--bg-primary); border-radius: var(--radius);
+    margin-bottom: 12px; border: 1px solid var(--border);
+  }
+  .mock-header-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+  .mock-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+  .mock-table th {
+    text-align: left; padding: 8px 10px; font-weight: 500;
+    color: var(--text-secondary); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
+  }
+  .mock-table td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+
+  .connector { text-align: center; padding: 4px 0; color: var(--text-tertiary); font-size: 16px; }
+
+  .qr-box {
+    width: 72px; height: 72px; border: 2px solid var(--border-hover);
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--text-tertiary); background: var(--bg-primary); flex-shrink: 0;
+  }
+
+  .verify-result { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: var(--radius); }
+  .verify-valid { background: var(--green-bg); }
+  .verify-icon {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--green-solid);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+  }
+
+  .section-note {
+    font-size: 12px; color: var(--text-secondary); padding: 12px 16px;
+    background: var(--bg-secondary); border-radius: var(--radius);
+    margin-top: 16px; line-height: 1.65; border-left: 3px solid var(--green-solid);
+  }
+
+  .stats-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+  .stat-card {
+    flex: 1; min-width: 130px; padding: 12px 16px; background: var(--bg-primary);
+    border-radius: var(--radius); border: 1px solid var(--border);
+  }
+  .stat-label { font-size: 11px; color: var(--text-secondary); }
+  .stat-val { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-top: 4px; }
+  .stat-val-green { color: var(--green-text); }
+  .stat-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+  .alert-box { margin-top: 12px; padding: 10px 14px; border-radius: var(--radius); font-size: 12px; }
+  .alert-amber { background: var(--amber-bg); color: var(--amber-text); }
+  .alert-red { background: var(--red-bg); color: var(--red-text); }
+
+  .cert-card {
+    padding: 20px; background: var(--bg-primary); border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .cert-meta { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; }
+  .cert-meta-item .cm-label { font-size: 11px; color: var(--text-tertiary); }
+  .cert-meta-item .cm-val { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-top: 2px; }
+
+  .verify-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 16px; }
+
+  .revoke-box { padding: 16px; background: var(--red-bg); border-radius: var(--radius); }
+  .revoke-title { font-size: 14px; font-weight: 600; color: var(--red-text); }
+  .revoke-desc { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  textarea {
+    width: 100%; font-size: 12px; min-height: 56px; margin-top: 12px;
+    padding: 10px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-sans);
+    resize: vertical;
+  }
+
+  .verify-input-area { text-align: center; padding: 20px 0; }
+  .verify-input-area h2 { font-size: 16px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+  .verify-input-area p { font-size: 12px; color: var(--text-secondary); margin-bottom: 18px; }
+  .verify-input-row { display: flex; gap: 8px; max-width: 400px; margin: 0 auto; }
+  .verify-input-row input {
+    flex: 1; font-size: 13px; padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius); background: var(--bg-primary); color: var(--text-primary);
+  }
+  .verify-scan { margin-top: 12px; font-size: 12px; color: var(--text-tertiary); }
+  .verify-scan span { color: var(--blue-text); cursor: default; }
+
+  .explainer-hero { margin-bottom: 24px; }
+  .explainer-title { font-size: 18px; font-weight: 600; color: var(--text-primary); line-height: 1.4; margin-bottom: 8px; }
+  .explainer-subtitle { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+  .explainer-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .explainer-card {
+    background: var(--bg-primary); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+  }
+  .ec-icon { color: var(--green-solid); margin-bottom: 12px; }
+  .ec-role { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+  .ec-body { font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 14px; }
+  .ec-touchpoint {
+    padding: 10px 14px; background: var(--bg-secondary); border-radius: var(--radius);
+    border-left: 3px solid var(--green-solid);
+  }
+  .ec-tp-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); font-weight: 500; margin-bottom: 4px; }
+  .ec-tp-val { font-size: 12px; color: var(--text-primary); line-height: 1.5; }
+
+  .explainer-summary {
+    background: var(--behind-bg); border-radius: var(--radius-lg); padding: 22px 26px;
+  }
+  .es-title { font-size: 14px; font-weight: 600; color: var(--behind-label); margin-bottom: 8px; }
+  .es-body { font-size: 13px; color: var(--behind-text); line-height: 1.7; }
+
+  @media (max-width: 600px) {
+    .explainer-cards { grid-template-columns: 1fr; }
+    .verify-fields { grid-template-columns: 1fr; }
+    .stats-grid { flex-direction: column; }
+    .cert-meta { flex-direction: column; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>TVET blockchain module — UX flows</h1>
+    <p>What each user sees vs. what happens on-chain, for every blockchain touchpoint in the system.</p>
+  </div>
+
+  <div class="roles">
+    <button class="role-btn active" onclick="show('nabteb')">NABTEB officer</button>
+    <button class="role-btn" onclick="show('student')">Student</button>
+    <button class="role-btn" onclick="show('employer')">Employer</button>
+    <button class="role-btn" onclick="show('fme')">FME admin</button>
+    <button class="role-btn" onclick="show('explainer')">Key insights</button>
+  </div>
+
+  <!-- NABTEB FLOW -->
+  <div id="flow-nabteb" class="flow active">
+    <div class="step"><div class="step-num">1</div><div><div class="step-title">NABTEB officer reviews approval queue</div><div class="step-desc">Standard table view — filterable by center, program, date. No blockchain UI elements anywhere.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">What the officer sees</div>
+      <div class="mock-header"><div class="mock-header-title">Certification approval queue</div><div><span class="badge badge-amber">23 pending</span></div></div>
+      <table class="mock-table">
+        <tr><th>Student</th><th>Center</th><th>Program</th><th>Score</th><th>Status</th><th></th></tr>
+        <tr><td>Adebayo, Chukwuemeka</td><td>Lagos VEI Centre</td><td>Electrical (VEI)</td><td>87/100</td><td><span class="badge badge-amber">Pending</span></td><td><span class="mock-btn mock-btn-green" style="padding:4px 12px;font-size:11px;">Review</span></td></tr>
+        <tr><td>Ibrahim, Fatima</td><td>Kano STC Hub</td><td>ICT (STC)</td><td>92/100</td><td><span class="badge badge-amber">Pending</span></td><td><span class="mock-btn mock-btn-green" style="padding:4px 12px;font-size:11px;">Review</span></td></tr>
+      </table>
+    </div>
+
+    <div class="step"><div class="step-num">2</div><div><div class="step-title">Officer clicks "Approve" on a student</div><div class="step-desc">Two buttons: green "Approve" and red "Reject with Feedback." Identical to any standard admin workflow.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">What the officer sees after clicking review</div>
+      <div class="field-row"><div class="field-label">Student</div><div class="field-val">Adebayo, Chukwuemeka</div></div>
+      <div class="field-row"><div class="field-label">TVET ID</div><div class="field-val">TVET-NG-2026-045892</div></div>
+      <div class="field-row"><div class="field-label">Program</div><div class="field-val">Electrical Installation (VEI)</div></div>
+      <div class="field-row"><div class="field-label">Training center</div><div class="field-val">Lagos VEI Centre</div></div>
+      <div class="field-row"><div class="field-label">Final score</div><div class="field-val">87/100 <span class="badge badge-green">Passed</span></div></div>
+      <div class="field-row"><div class="field-label">Assessments</div><div class="field-val">3/3 completed</div></div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <span class="mock-btn mock-btn-green">Approve &amp; issue certificate</span>
+        <span class="mock-btn mock-btn-red">Reject with feedback</span>
+      </div>
+    </div>
+
+    <div class="connector">↓</div>
+
+    <div class="step"><div class="step-num">3</div><div><div class="step-title">Approval triggers certificate generation</div><div class="step-desc">Officer sees a success message. Behind the scenes, two things happen simultaneously.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">What the officer sees</div>
+      <div class="verify-result verify-valid">
+        <div class="verify-icon">✓</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--green-text);">Certificate issued successfully</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Certificate TVET-2026-123456 issued to Adebayo, Chukwuemeka. Student has been notified via SMS.</div>
+        </div>
+      </div>
+    </div>
+    <div class="behind">
+      <div class="screen-label">What happens behind the scenes (invisible to officer)</div>
+      <p>1. Backend generates signed PDF certificate → stores in cloud storage</p>
+      <p>2. Backend calls Blockchain Integration Service:</p>
+      <p>&nbsp;&nbsp; POST /api/chain/mint</p>
+      <p>&nbsp;&nbsp; { certNumber: "TVET-2026-123456",</p>
+      <p>&nbsp;&nbsp;&nbsp;&nbsp; program: "VEI", trade: "Electrical Installation",</p>
+      <p>&nbsp;&nbsp;&nbsp;&nbsp; centerId: "LG-VEI-001", issueDate: "2026-04-13",</p>
+      <p>&nbsp;&nbsp;&nbsp;&nbsp; approvalRef: "NAB-APR-78291",</p>
+      <p>&nbsp;&nbsp;&nbsp;&nbsp; pdfHash: "sha256:a8f3c9..." }</p>
+      <p>3. Service mints compressed NFT on Solana via Bubblegum</p>
+      <p>4. cNFT asset ID stored in PostgreSQL alongside certificate record</p>
+      <p>5. Total time: ~2 seconds. Officer never waits.</p>
+    </div>
+    <div class="section-note">The officer's workflow is identical whether blockchain is enabled or not. The on-chain mint happens asynchronously — if it fails, it retries silently. The certificate is issued either way, and the chain record catches up.</div>
+  </div>
+
+  <!-- STUDENT FLOW -->
+  <div id="flow-student" class="flow">
+    <div class="step"><div class="step-num">1</div><div><div class="step-title">Student sees certification status update on dashboard</div><div class="step-desc">The status badge changes from "Under NABTEB review" (amber) to "Certified" (green). An alert prompts them to download.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">Student dashboard — certification status card</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Training progress</div><div class="stat-val">100%</div></div>
+        <div class="stat-card"><div class="stat-label">Latest assessment</div><div class="stat-val">87/100</div></div>
+        <div class="stat-card" style="background:var(--green-bg);border-color:transparent;"><div class="stat-label" style="color:var(--green-text);">Certification status</div><div class="stat-val stat-val-green">Certified ✓</div></div>
+      </div>
+      <div class="alert-box alert-amber" style="margin-top:12px;">Your certificate is ready! Download it from the "My certificates" tab.</div>
+    </div>
+
+    <div class="step"><div class="step-num">2</div><div><div class="step-title">Student opens "My certificates" tab</div><div class="step-desc">Certificate card shows NABTEB + FME logos, certificate details, a QR code, and download/share buttons.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">My certificates screen</div>
+      <div class="cert-card">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <div>
+            <div style="font-size:11px;color:var(--text-tertiary);">NABTEB · Federal Ministry of Education</div>
+            <div style="font-size:16px;font-weight:600;color:var(--text-primary);margin-top:6px;">National Technical Certificate (NTC)</div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-top:2px;">Electrical Installation</div>
+          </div>
+          <div class="qr-box">QR code</div>
+        </div>
+        <div class="cert-meta">
+          <div class="cert-meta-item"><div class="cm-label">Certificate no.</div><div class="cm-val">TVET-2026-123456</div></div>
+          <div class="cert-meta-item"><div class="cm-label">Issued</div><div class="cm-val">13/04/2026</div></div>
+          <div class="cert-meta-item"><div class="cm-label">Verification</div><div class="cm-val"><span class="badge badge-green">Blockchain-verified</span></div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <span class="mock-btn mock-btn-green">Download PDF</span>
+          <span class="mock-btn mock-btn-outline">Share</span>
+        </div>
+      </div>
+    </div>
+    <div class="behind">
+      <div class="screen-label">What happens when student downloads</div>
+      <p>1. Backend fetches signed PDF from cloud storage</p>
+      <p>2. QR code on PDF encodes:</p>
+      <p>&nbsp;&nbsp; tvetcert.education.gov.ng/verify/TVET-2026-123456</p>
+      <p>3. No wallet, no private key, no on-chain interaction</p>
+      <p>4. The "Blockchain-verified" badge is a trust signal —</p>
+      <p>&nbsp;&nbsp; it tells the student their credential is tamper-proof</p>
+    </div>
+    <div class="section-note">The only blockchain-related UI the student ever sees is a small "Blockchain-verified" badge on their certificate card. This is a trust signal, not a functional element. They never interact with the chain.</div>
+  </div>
+
+  <!-- EMPLOYER FLOW -->
+  <div id="flow-employer" class="flow">
+    <div class="step"><div class="step-num">1</div><div><div class="step-title">Employer visits the public verification portal</div><div class="step-desc">No login required. Clean page with a text field and QR scanner button. No blockchain terminology visible.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">Public verification page — tvetcert.education.gov.ng/verify</div>
+      <div class="verify-input-area">
+        <h2>Verify a NABTEB certificate</h2>
+        <p>Enter the certificate number or scan the QR code on the certificate</p>
+        <div class="verify-input-row">
+          <input type="text" placeholder="e.g. TVET-2026-123456" readonly />
+          <span class="mock-btn mock-btn-green" style="white-space:nowrap;">Verify</span>
+        </div>
+        <div class="verify-scan">or <span>scan QR code with camera</span></div>
+      </div>
+    </div>
+
+    <div class="step"><div class="step-num">2</div><div><div class="step-title">Employer enters certificate number and clicks "Verify"</div><div class="step-desc">Result appears in under 2 seconds: green "verified" badge with certificate details.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">Verification result</div>
+      <div class="verify-result verify-valid">
+        <div class="verify-icon">✓</div>
+        <div style="flex:1;">
+          <div style="font-size:16px;font-weight:600;color:var(--green-text);">Certificate verified</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">This certificate is authentic and has not been tampered with.</div>
+        </div>
+      </div>
+      <div class="verify-fields">
+        <div class="field-row"><div class="field-label">Holder</div><div class="field-val">Adebayo, Chukwuemeka</div></div>
+        <div class="field-row"><div class="field-label">Certificate no.</div><div class="field-val">TVET-2026-123456</div></div>
+        <div class="field-row"><div class="field-label">Program</div><div class="field-val">Electrical Installation (VEI)</div></div>
+        <div class="field-row"><div class="field-label">Training center</div><div class="field-val">Lagos VEI Centre</div></div>
+        <div class="field-row"><div class="field-label">Issued</div><div class="field-val">13 April 2026</div></div>
+        <div class="field-row"><div class="field-label">Issuing body</div><div class="field-val">NABTEB</div></div>
+      </div>
+      <div style="margin-top:16px;"><span class="mock-btn mock-btn-outline">Download verification report</span></div>
+    </div>
+    <div class="behind">
+      <div class="screen-label">What happens behind the scenes</div>
+      <p>1. Frontend sends: POST /api/certificate/verify</p>
+      <p>&nbsp;&nbsp; { certNumber: "TVET-2026-123456" }</p>
+      <p>2. Backend → Blockchain Integration Service</p>
+      <p>3. Service queries Helius DAS API for cNFT matching certNumber</p>
+      <p>4. Retrieves on-chain metadata + Merkle proof</p>
+      <p>5. Cross-references pdfHash on-chain vs. hash in PostgreSQL</p>
+      <p>6. Both match → returns "VALID"</p>
+      <p>7. Holder name pulled from PostgreSQL (never on-chain)</p>
+      <p>8. Total time: ~1.5 seconds</p>
+    </div>
+    <div class="section-note">The employer never knows blockchain is involved. They see a government verification portal, enter a number, and get a result. The on-chain lookup is what guarantees the result hasn't been fabricated — but that's infrastructure, not interface.</div>
+  </div>
+
+  <!-- FME ADMIN FLOW -->
+  <div id="flow-fme" class="flow">
+    <div class="step"><div class="step-num">1</div><div><div class="step-title">FME admin sees blockchain health in the system status panel</div><div class="step-desc">This is the only place where blockchain is mentioned by name — and it's in a technical system health view that only FME admins see.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">FME admin dashboard — system health panel</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">API gateway</div><div class="stat-val stat-val-green" style="font-size:14px;">Operational</div></div>
+        <div class="stat-card"><div class="stat-label">NABTEB API sync</div><div class="stat-val stat-val-green" style="font-size:14px;">Synced 2m ago</div></div>
+        <div class="stat-card"><div class="stat-label">Blockchain registry</div><div class="stat-val stat-val-green" style="font-size:14px;">Operational</div><div class="stat-sub">31,247 certs anchored</div></div>
+        <div class="stat-card"><div class="stat-label">Verification portal</div><div class="stat-val" style="font-size:14px;">1,247 queries/day</div></div>
+      </div>
+    </div>
+
+    <div class="step"><div class="step-num">2</div><div><div class="step-title">Certificate registry with tamper-evidence indicators</div><div class="step-desc">Each record shows a "chain-verified" indicator confirming the on-chain anchor is intact.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">Certificate registry — admin view</div>
+      <div class="mock-header"><div class="mock-header-title">National certificate registry</div><div><input type="text" placeholder="Search certificates..." style="font-size:12px;width:180px;padding:6px 10px;" readonly /></div></div>
+      <table class="mock-table">
+        <tr><th>Certificate no.</th><th>Holder</th><th>Program</th><th>Issued</th><th>Integrity</th></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">TVET-2026-123456</td><td>Adebayo, C.</td><td>Electrical (VEI)</td><td>13/04/2026</td><td><span class="badge badge-green">Chain-verified</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">TVET-2026-123455</td><td>Ibrahim, F.</td><td>ICT (STC)</td><td>12/04/2026</td><td><span class="badge badge-green">Chain-verified</span></td></tr>
+        <tr><td style="font-family:var(--font-mono);font-size:11px;">TVET-2026-123400</td><td>Okonkwo, N.</td><td>Welding (VEI)</td><td>10/04/2026</td><td><span class="badge badge-green">Chain-verified</span></td></tr>
+      </table>
+    </div>
+    <div class="behind">
+      <div class="screen-label">How "chain-verified" works</div>
+      <p>1. Backend periodically checks each cert's on-chain status</p>
+      <p>2. Queries Helius: does cNFT exist with matching certNumber?</p>
+      <p>3. Compares on-chain pdfHash with stored pdfHash</p>
+      <p>4. If both match → "Chain-verified" (green)</p>
+      <p>5. If mismatch → "Integrity alert" (red) — triggers investigation</p>
+      <p>6. If not yet anchored → "Pending" (amber) — retry in progress</p>
+    </div>
+
+    <div class="step"><div class="step-num">3</div><div><div class="step-title">Revocation workflow (rare — fraud cases only)</div><div class="step-desc">If a certificate needs to be revoked, the admin clicks "Revoke." The on-chain record is burned, creating a permanent audit event.</div></div></div>
+    <div class="screen-mock">
+      <div class="screen-label">Revocation confirmation dialog</div>
+      <div class="revoke-box">
+        <div class="revoke-title">Revoke certificate TVET-2026-000042?</div>
+        <div class="revoke-desc">This action is permanent and will be recorded on the blockchain audit trail. The certificate will show as "Revoked" in all verification queries. Reason is required.</div>
+        <textarea placeholder="Reason for revocation (required)..." readonly></textarea>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <span class="mock-btn mock-btn-red">Confirm revocation</span>
+          <span class="mock-btn mock-btn-outline">Cancel</span>
+        </div>
+      </div>
+    </div>
+    <div class="section-note">The FME admin dashboard is the only interface that acknowledges the blockchain layer exists — and even there, it's presented as a system health metric and a data integrity indicator, not as a separate module the admin has to manage.</div>
+  </div>
+
+  <!-- EXPLAINER FLOW -->
+  <div id="flow-explainer" class="flow">
+    <div class="explainer-hero">
+      <div class="explainer-title">The "blockchain module" doesn't look like a module at all.</div>
+      <div class="explainer-subtitle">It looks like a small badge, a system health indicator, and a verification result that happens to be powered by an on-chain lookup instead of a database query. Everything else is plumbing.</div>
+    </div>
+
+    <div class="explainer-cards">
+      <div class="explainer-card">
+        <div class="ec-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="ec-role">NABTEB officer</div>
+        <div class="ec-body">Their workflow is completely unchanged. They click "Approve," see a success message, move to the next student. The cNFT mint fires asynchronously after the approval event. If the chain write fails, it retries silently. The officer never waits for it, never knows about it.</div>
+        <div class="ec-touchpoint">
+          <div class="ec-tp-label">Blockchain touchpoint</div>
+          <div class="ec-tp-val">None visible. Zero UI change.</div>
+        </div>
+      </div>
+
+      <div class="explainer-card">
+        <div class="ec-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        </div>
+        <div class="ec-role">Student</div>
+        <div class="ec-body">The only blockchain-related element they ever see is a small "Blockchain-verified" badge on their certificate card. This is a trust signal — it tells them their credential is tamper-proof. They download a normal PDF. The QR code encodes a standard URL, not a blockchain address.</div>
+        <div class="ec-touchpoint">
+          <div class="ec-tp-label">Blockchain touchpoint</div>
+          <div class="ec-tp-val"><span class="badge badge-green" style="font-size:10px;">Blockchain-verified</span> badge on certificate card</div>
+        </div>
+      </div>
+
+      <div class="explainer-card">
+        <div class="ec-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <div class="ec-role">Employer</div>
+        <div class="ec-body">Zero blockchain exposure. They enter a certificate number, get a green checkmark or red X. The on-chain lookup happens entirely server-side. The verification report they download is a normal PDF timestamped with when they checked.</div>
+        <div class="ec-touchpoint">
+          <div class="ec-tp-label">Blockchain touchpoint</div>
+          <div class="ec-tp-val">None visible. Verification is powered by on-chain data but the employer only sees a standard result page.</div>
+        </div>
+      </div>
+
+      <div class="explainer-card">
+        <div class="ec-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="ec-role">FME admin</div>
+        <div class="ec-body">The only interface where blockchain is mentioned by name — in a technical system health panel showing "Blockchain registry: Operational" and "Chain-verified" integrity indicators on the certificate registry. They also handle revocations (rare) which create permanent on-chain audit events.</div>
+        <div class="ec-touchpoint">
+          <div class="ec-tp-label">Blockchain touchpoint</div>
+          <div class="ec-tp-val">System health status card + "Chain-verified" badge per certificate in registry view.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="explainer-summary">
+      <div class="es-title">The design principle</div>
+      <div class="es-body">Blockchain is infrastructure, not interface. Like PostgreSQL or a CDN, it operates silently behind the API gateway. Nobody asks users to interact with their database directly — they shouldn't interact with the blockchain directly either. The entire Solana layer sits behind the Blockchain Integration Service, and no user — across any of the five portals — ever touches a wallet, signs a transaction, pays gas, or sees a blockchain explorer. The UX is 100% web2. The trust guarantees are web3.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(role) {
+  document.querySelectorAll('.flow').forEach(f => f.classList.remove('active'));
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('flow-' + role).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
